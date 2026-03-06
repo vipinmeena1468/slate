@@ -1,0 +1,26 @@
+{
+  "appId": "com.slate.app",
+  "productName": "Slate",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**",
+    "electron/main.mjs",
+    "electron/preload.cjs"
+  ],
+  "mac": {
+    "identity": null,
+    "icon": "build/icon.icns",
+    "category": "public.app-category.productivity",
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["arm64", "x64"]
+      }
+    ]
+  },
+  "dmg": {
+    "title": "Slate"
+  }
+}
