@@ -2,8 +2,6 @@
 
 A minimalist writing app for macOS. Dark background, monospace font, no distractions.
 
-![Slate Icon](Slate1024x1024.png)
-
 ---
 
 ## Features
@@ -21,8 +19,8 @@ A minimalist writing app for macOS. Dark background, monospace font, no distract
 
 Go to [Releases](../../releases) and download the DMG for your Mac:
 
-- `Slate-x.x.x-arm64.dmg` — Apple Silicon (M1/M2/M3/M4)
-- `Slate-x.x.x.dmg` — Intel
+- `Slate-0.1.0-arm64.dmg` — Apple Silicon (M1/M2/M3/M4)
+- `Slate-0.1.0.dmg` — Intel
 
 ### Install
 
