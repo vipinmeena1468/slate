@@ -17,6 +17,26 @@ final class SlateTextView: NSTextView {
     var mutedTextColor: NSColor = NSColor(white: 0.43,  alpha: 1)
     let accentColor:    NSColor = NSColor(red: 0.961, green: 0.396, blue: 0.396, alpha: 1)
 
+    // MARK: - Caret height fix
+    // lineSpacing=12 inflates the line fragment rect, making the caret too tall.
+    // font.ascender - font.descender gives the natural line height (no spacing),
+    // which is where the text actually lives. lineSpacing is appended at the bottom
+    // of each fragment, so we start at rect.minY without any vertical offset.
+    override func drawInsertionPoint(in rect: NSRect, color: NSColor, turnedOn flag: Bool) {
+        let font           = EditorDefaults.font
+        let naturalHeight  = ceil(font.ascender - font.descender)
+        let shortRect      = NSRect(x: rect.minX, y: rect.minY,
+                                    width: rect.width, height: min(naturalHeight, rect.height))
+        super.drawInsertionPoint(in: shortRect, color: color, turnedOn: flag)
+    }
+
+    override func setNeedsDisplay(_ rect: NSRect, avoidAdditionalLayout flag: Bool) {
+        // Expand invalidation rect to fully erase the caret on each blink cycle
+        super.setNeedsDisplay(NSRect(x: rect.minX, y: rect.minY - 4,
+                                    width: rect.width, height: rect.height + 8),
+                              avoidAdditionalLayout: flag)
+    }
+
     // MARK: - Checkbox toggle on click
 
     override func mouseDown(with event: NSEvent) {

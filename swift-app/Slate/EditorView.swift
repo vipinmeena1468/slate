@@ -261,6 +261,7 @@ struct EditorView: NSViewRepresentable {
     private func loadContent(into textView: SlateTextView, for date: String) {
         if let saved = store.load(date: date) {
             textView.textStorage?.setAttributedString(saved)
+            reapplyForegroundColor(to: textView)
         } else {
             textView.string = ""
             textView.typingAttributes = EditorDefaults.typingAttributes
@@ -278,6 +279,20 @@ struct EditorView: NSViewRepresentable {
         textView.insertionPointColor = EditorDefaults.caretColor
         textView.themeTextColor      = fg
         textView.mutedTextColor      = muted
+        reapplyForegroundColor(to: textView)
+    }
+
+    private func reapplyForegroundColor(to textView: SlateTextView) {
+        guard let storage = textView.textStorage, storage.length > 0 else { return }
+        let fg: NSColor = effectiveIsDark ? NSColor(white: 0.949, alpha: 1) : NSColor(white: 0.11, alpha: 1)
+        let fullRange = NSRange(location: 0, length: storage.length)
+        storage.beginEditing()
+        storage.enumerateAttribute(.attachment, in: fullRange, options: []) { val, range, _ in
+            if val == nil {
+                storage.addAttribute(.foregroundColor, value: fg, range: range)
+            }
+        }
+        storage.endEditing()
     }
 }
 
