@@ -2,8 +2,6 @@
 
 A minimalist daily journal for macOS. One entry per day. No cloud, no accounts, no distractions.
 
-![Slate Screenshot](assets/screenshot.png)
-
 ---
 
 ## Features
@@ -13,8 +11,6 @@ A minimalist daily journal for macOS. One entry per day. No cloud, no accounts, 
 - **Slash commands** — type `/` at the start of a line to insert:
   - To-do checkboxes (click to check/uncheck, strikethrough on complete)
   - Bullet points
-  - Headings (H1, H2, H3)
-  - Divider
 - **Bullet list continuation** — press Return to continue a list, double Return to exit
 - **Past Documents** — browse and reopen previous entries (`⌘⇧H`)
 - **Open** any `.md`, `.txt`, `.rtf`, or `.html` file into today's entry (`⌘O`)
