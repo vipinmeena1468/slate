@@ -44,6 +44,45 @@ final class SlateTextView: NSTextView {
         super.mouseDown(with: event)
     }
 
+    // Suppress macOS attachment context menu (Markup / More…) on checkboxes
+    override func menu(for event: NSEvent) -> NSMenu? {
+        if isOverCheckbox(at: event) { return nil }
+        return super.menu(for: event)
+    }
+
+    // Show pointing-hand cursor when hovering over any checkbox attachment
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        guard let storage = textStorage,
+              let lm = layoutManager,
+              let tc = textContainer else { return }
+        let full = NSRange(location: 0, length: storage.length)
+        storage.enumerateAttribute(.attachment, in: full, options: []) { val, range, _ in
+            guard val is CheckboxAttachment ||
+                  (val as? NSTextAttachment).flatMap({ CheckboxAttachment.from($0) }) != nil
+            else { return }
+            let glyphRange = lm.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+            let rect = lm.boundingRect(forGlyphRange: glyphRange, in: tc)
+                         .offsetBy(dx: textContainerOrigin.x, dy: textContainerOrigin.y)
+            addCursorRect(rect, cursor: .pointingHand)
+        }
+    }
+
+    private func isOverCheckbox(at event: NSEvent) -> Bool {
+        guard let layoutManager, let textContainer else { return false }
+        let raw = convert(event.locationInWindow, from: nil)
+        let pt  = NSPoint(x: raw.x - textContainerOrigin.x,
+                          y: raw.y - textContainerOrigin.y)
+        let glyphIdx = layoutManager.glyphIndex(for: pt, in: textContainer,
+                                                fractionOfDistanceThroughGlyph: nil)
+        let charIdx  = layoutManager.characterIndexForGlyph(at: glyphIdx)
+        guard charIdx < string.count else { return false }
+        guard (string as NSString).character(at: charIdx) == 0xFFFC,
+              let storage = textStorage else { return false }
+        let att = storage.attribute(.attachment, at: charIdx, effectiveRange: nil) as? NSTextAttachment
+        return att is CheckboxAttachment || att.flatMap({ CheckboxAttachment.from($0) }) != nil
+    }
+
     private func handleCheckboxClick(_ event: NSEvent) -> Bool {
         guard let layoutManager, let textContainer else { return false }
 
@@ -72,6 +111,56 @@ final class SlateTextView: NSTextView {
         // Trigger autosave via delegate
         delegate?.textDidChange?(Notification(name: NSText.didChangeNotification, object: self))
         return true
+    }
+
+    // MARK: - Reconstruct CheckboxAttachment after RTFD load
+    //
+    // NSAttributedString loaded from RTFD restores attachments as plain NSTextAttachment
+    // (just a fileWrapper, no image). Call this after setAttributedString to restore
+    // our custom rendered checkboxes.
+
+    func reapplyCheckboxes() {
+        guard let storage = textStorage, storage.length > 0 else { return }
+        let full = NSRange(location: 0, length: storage.length)
+
+        var replacements:      [(NSRange, CheckboxAttachment)] = []
+        var checkboxParaRanges: [NSRange] = []
+
+        storage.enumerateAttribute(.attachment, in: full, options: []) { val, range, _ in
+            let str       = storage.string as NSString
+            let paraRange = str.paragraphRange(for: range)
+
+            if val is CheckboxAttachment {
+                // Already reconstructed by JournalStore — just fix lineSpacing
+                checkboxParaRanges.append(paraRange)
+            } else if let att = val as? NSTextAttachment,
+                      let checkbox = CheckboxAttachment.from(att) {
+                replacements.append((range, checkbox))
+                checkboxParaRanges.append(paraRange)
+            }
+        }
+
+        guard !replacements.isEmpty || !checkboxParaRanges.isEmpty else { return }
+
+        storage.beginEditing()
+
+        for (range, checkbox) in replacements.reversed() {
+            var carry = storage.attributes(at: range.location, effectiveRange: nil)
+            carry.removeValue(forKey: .attachment)
+            let replacement = NSMutableAttributedString(attachment: checkbox)
+            replacement.addAttributes(carry, range: NSRange(location: 0, length: 1))
+            storage.replaceCharacters(in: range, with: replacement)
+        }
+
+        // RTF doesn't preserve lineSpacing — fix it for every checkbox paragraph.
+        // Targets only checkbox lines; all other text is untouched.
+        for paraRange in checkboxParaRanges {
+            storage.addAttribute(.paragraphStyle,
+                                 value: EditorDefaults.paragraphStyle,
+                                 range: paraRange)
+        }
+
+        storage.endEditing()
     }
 
     // MARK: - Toggle logic

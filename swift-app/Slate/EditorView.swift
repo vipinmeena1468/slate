@@ -261,10 +261,13 @@ struct EditorView: NSViewRepresentable {
     private func loadContent(into textView: SlateTextView, for date: String) {
         if let saved = store.load(date: date) {
             textView.textStorage?.setAttributedString(saved)
+            textView.reapplyCheckboxes()
             reapplyForegroundColor(to: textView)
         } else {
             textView.string = ""
-            textView.typingAttributes = EditorDefaults.typingAttributes
+            var attrs = EditorDefaults.typingAttributes
+            attrs[.foregroundColor] = effectiveIsDark ? NSColor(white: 0.949, alpha: 1) : NSColor(white: 0.11, alpha: 1)
+            textView.typingAttributes = attrs
         }
         let end = (textView.string as NSString).length
         textView.setSelectedRange(NSRange(location: end, length: 0))
@@ -279,6 +282,9 @@ struct EditorView: NSViewRepresentable {
         textView.insertionPointColor = EditorDefaults.caretColor
         textView.themeTextColor      = fg
         textView.mutedTextColor      = muted
+        var attrs = EditorDefaults.typingAttributes
+        attrs[.foregroundColor] = fg
+        textView.typingAttributes = attrs
         reapplyForegroundColor(to: textView)
     }
 
