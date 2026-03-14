@@ -1,59 +1,58 @@
 # Slate
 
-A minimalist writing app for macOS. Dark background, monospace font, no distractions.
+A minimalist daily journal for macOS. One entry per day. No cloud, no accounts, no distractions.
+
+![Slate Screenshot](assets/screenshot.png)
 
 ---
 
 ## Features
 
-- Clean, distraction-free writing experience
-- Monospace font (IBM Plex Mono)
-- Dark and light mode toggle
-- Dash bullet lists — type `- ` at the start of a line
-- Dot bullet lists — type `/` and select Bullet Point
-- To-do checkboxes — type `/` and select To-Do
-- Auto-saves to local storage
-- Native macOS window with traffic light controls
+- Clean, distraction-free writing — monospace font, minimal chrome
+- Auto-saves as you type
+- **Slash commands** — type `/` at the start of a line to insert:
+  - To-do checkboxes (click to check/uncheck, strikethrough on complete)
+  - Bullet points
+  - Headings (H1, H2, H3)
+  - Divider
+- **Bullet list continuation** — press Return to continue a list, double Return to exit
+- **Past Documents** — browse and reopen previous entries (`⌘⇧H`)
+- **Open** any `.md`, `.txt`, `.rtf`, or `.html` file into today's entry (`⌘O`)
+- **Save As** — export to `.txt`, `.md`, `.rtf`, or `.html` (`⌘⇧S`)
+- Appearance: System Default / Light / Dark (`Slate → Appearance`)
+- All data stored locally in `~/Library/Application Support/Slate/`
+
+---
 
 ## Download
 
-Go to [Releases](../../releases) and download the DMG for your Mac:
-
-- `Slate-x.x.x-arm64.dmg` — Apple Silicon (M1/M2/M3/M4)
-- `Slate-x.x.x.dmg` — Intel
+Go to [Releases](../../releases) and download **Slate.dmg**.
 
 ### Install
 
 1. Open the DMG and drag **Slate.app** into Applications
-2. First launch: right-click → **Open** → **Open** (macOS Gatekeeper bypass, one-time only)
+2. First launch: right-click → **Open** → click **Open** when macOS prompts
+
+> This app is unsigned (no Apple Developer account). The right-click → Open step is a one-time bypass for macOS Gatekeeper.
 
 ---
 
 ## Build from Source
 
-Requires Node.js 18+.
+Requires Xcode 15+ and macOS 14+.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/slate.git
-cd slate
-npm install
-npm run dist
+git clone https://github.com/vipinmeena1468/slate.git
+cd slate/swift-app
+open Slate.xcodeproj
 ```
 
-The DMG will be in the `release/` folder.
-
-For development:
-
-```bash
-npm run dev        # browser only (localhost:5173)
-npm run dev:electron  # native Electron window
-```
+Then press `⌘R` to build and run.
 
 ---
 
 ## Tech Stack
 
-- [Electron](https://www.electronjs.org/) — native macOS window
-- [React](https://react.dev/) + [Vite](https://vitejs.dev/) — UI
-- [Tiptap](https://tiptap.dev/) — rich text editor (ProseMirror-based)
-- [Tippy.js](https://atomiks.github.io/tippyjs/) — slash command popup
+- Swift + SwiftUI
+- AppKit (NSTextView, NSTextStorage, NSTextAttachment)
+- RTFD format for rich text persistence with attachment support
