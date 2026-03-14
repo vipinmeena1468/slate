@@ -1,6 +1,24 @@
-node_modules/
-dist/
-release/
-dist-electron/
-*.local
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Releases — distribute separately, don't commit binaries
+releases/
+*.dmg
+*.pkg

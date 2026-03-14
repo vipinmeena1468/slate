@@ -2,8 +2,6 @@
 
 A minimalist writing app for macOS. Dark background, monospace font, no distractions.
 
-![Slate Icon](Slate1024x1024.png)
-
 ---
 
 ## Features
